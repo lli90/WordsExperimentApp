@@ -6,6 +6,7 @@ import pickle
 import itertools
 import uuid
 import time
+import secrets
 import os
 
 from CONFIG import BASE_FILE_LOCATION
@@ -14,9 +15,14 @@ import attack
 import utils
 
 app = Flask(__name__, static_folder="./build/static", template_folder="./build/")
-app.secret_key = "b9d53fe4b4564a95aed2cf966857540d"
+app.secret_key = secrets.token_urlsafe(64)
 
 WORDLIST_NAME = "trustwords.csv"
+
+@app.after_request
+def add_header(response):
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response
 
 # This is used to fix Flask's compatability with the react-routing 
 @app.route('/', defaults={'path': ''})
@@ -31,7 +37,6 @@ def index():
 @app.route('/get_audio')
 @cross_origin()
 def get_audio():
-
     """
     Gets the currently active audio file
     """
@@ -116,7 +121,6 @@ def new_experiment():
     """
     This end point is designed to initialise the experiment attached to a certain ID
     """
-
     if not session.get("exp_id"):
 
         user_agent = request.headers.get("User-Agent")
