@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import {Phone} from '@material-ui/icons';
-
+import {URL_BASE} from '../../global'
 import LoadingOverlay from 'react-loading-overlay';
 import Sound from 'react-sound'
 
@@ -94,7 +94,7 @@ export default class AudioButton extends Component {
 
                 {this.state.playing &&
                     <Sound
-                        url={"/get_audio?id=" + this.state.id}
+                        url={`${URL_BASE}/get_audio?id=${this.state.id}`}
                         playStatus={Sound.status.PLAYING}
                         onLoad={(loaded) => this.handleSongLoaded(loaded)}
                         onFinishedPlaying={() => this.handleSongFinishedPlaying()}

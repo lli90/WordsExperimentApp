@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-
-var URL_BASE = ""
+import {URL_BASE, REQUEST_SETTINGS} from '../../global'
 
 export default class PostExperiment extends Component {
 
@@ -17,7 +16,7 @@ export default class PostExperiment extends Component {
     }
 
     request_id() {
-        fetch(URL_BASE + '/get_id')
+        fetch(URL_BASE + '/get_id', REQUEST_SETTINGS)
           .then((r) => r.text())
           .then((t) => {
               console.log(t)

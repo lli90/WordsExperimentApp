@@ -3,10 +3,7 @@ import React, { Component } from 'react';
 import Device from "react-device-frame";
 import SplitterLayout from 'react-splitter-layout';
 
-import AudioButton from '../Experiment/AudioButton.jsx'
-
 import 'react-splitter-layout/lib/index.css';
-
 
 export default class LandingPage extends Component {
 

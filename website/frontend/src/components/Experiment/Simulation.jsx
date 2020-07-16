@@ -1,17 +1,15 @@
+import 'react-toastify/dist/ReactToastify.css';
+
 import React, { Component } from 'react';
 import { View, Image, StyleSheet, Text } from 'react-native';
 import {Flip, ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import {URL_BASE, REQUEST_SETTINGS} from '../../global'
 
 import Loader from 'react-loader-spinner'
-
 import AudioButton from '../Experiment/AudioButton.jsx'
 
 var trustword_top = require("../../images/trustwords_top.jpg");
 var trustword_filler = require("../../images/trustwords_filler.jpg");
-
-var URL_BASE = "https://afray.pythonanywhere.com"
-// var URL_BASE = "http://localhost:5000" //DEBUG
 
 const loadingAnimation = <Loader type="ThreeDots" color="#00BFFF" height="14"	width="20"/>
 
@@ -61,7 +59,7 @@ export default class TrustwordSimulation extends Component {
   onClick_accept() {
     this.show_word_loading()
     toast.success("ACCEPT")
-    fetch(URL_BASE + '/submit_result?result=True')
+    fetch(URL_BASE + '/submit_result?result=True', REQUEST_SETTINGS)
       .then((r) => r.text())
       .then(() => this.refresh_words())
   }
@@ -69,21 +67,21 @@ export default class TrustwordSimulation extends Component {
   onClick_decline() {
     this.show_word_loading()
     toast.error("DECLINE" )
-    fetch(URL_BASE + '/submit_result?result=False')
+    fetch(URL_BASE + '/submit_result?result=False', REQUEST_SETTINGS)
       .then((r) => r.text())
       .then(() => this.refresh_words())
   }
 
   setup_experiment() {
     this.show_word_loading()
-    fetch(URL_BASE + '/new_experiment')
+    fetch(URL_BASE + '/new_experiment', REQUEST_SETTINGS)
       .then((r) => r.text())
       .then(() => this.refresh_words())
   }
 
   refresh_words() {
 
-    fetch(URL_BASE + '/get_words')
+      fetch(URL_BASE + '/get_words', REQUEST_SETTINGS)
       .then(response => response.text())
       .then(t => {
         if (!this.experiment_finished(t)) {
@@ -162,5 +160,4 @@ export default class TrustwordSimulation extends Component {
       </View>
     );
   }
-
 }
