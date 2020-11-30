@@ -30,5 +30,5 @@ yarn-error.log*
 /website/backend/results/*.json
 /website/backend/build
 /website/production*/website.zip
-/website/production*/*
+/website/production*/website
 /.vscode/**/**
