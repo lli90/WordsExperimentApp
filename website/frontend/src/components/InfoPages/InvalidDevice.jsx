@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export default class PostExperiment extends Component {
+export default class InvalidDevice extends Component {
 
     render() {
         return (
@@ -15,11 +15,11 @@ export default class PostExperiment extends Component {
               }}
             >
                 <div>
-                    <br/>
-                    Thank you for completing this section of the study.
-                    <br/>
-                    <br/>
-                    Please navigate to the next page by clicking on the right arrow at the bottom of the screen.
+                    <br />
+                    You are using an invalid device!
+                    <br />
+                    <br />
+                    Please only use a computer or tablet.
                 </div>
             </div>
         )

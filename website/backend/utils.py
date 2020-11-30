@@ -1,13 +1,10 @@
 from flask import session
 from experiment import Experiment
-import pickle
 import attack
 import random
 
-from CONFIG import BASE_FILE_LOCATION, NUMBER_OF_ROUNDS, GRACE_ROUNDS
-
-def save_experiment(expr):
-    pickle.dump(expr, open(f"{BASE_FILE_LOCATION}results/{expr.ExperimentID}.pkl", "wb"))
+from config import NUMBER_OF_ATTACKS, BASE_FILE_LOCATION, NUMBER_OF_ROUNDS, GRACE_ROUNDS, NUMBER_OF_WORDS
+from round import Round 
 
 def load_wordlist(path):
     wordlist = []
@@ -23,36 +20,80 @@ def load_wordlist(path):
 
     return wordlist
 
-def gen_new_words(wordlist):
-    
+def gen_word_set(wordlist, exp):
     """
-    This method provides the next round of words, it is responsible for dealing 
-    out the 'attack' cases and working out their matches
+    Method creates the entire experiment schema. 
+    It generates all the words required and places attacks in the #
     """
 
-    exp_id = session.get("exp_id")
-    exp = Experiment.from_json(session[exp_id])
+    words = [None] * NUMBER_OF_ROUNDS
 
-    if exp.get_round_number() >= GRACE_ROUNDS:
-        # # Determines if their is an attack
-        attack_schema = attack.decision()
-    else:
-        attack_schema = None
+    # Generates attack positions
+    attackPositions = []
+    while True:
 
-    if attack_schema:
+        r = random.SystemRandom()
 
-        # Grabs the original words to show
-        new_words = attack_schema[3]
-    else:
-        new_words = get_random_words(wordlist)
+        position = r.randint(GRACE_ROUNDS + 1, NUMBER_OF_ROUNDS) - 1
 
-    exp = Experiment.from_json(session[exp_id])
-    exp.add_round(new_words, attack_schema)
-    session[exp_id] = exp.to_json()
+        if not position in attackPositions:
+            attackPositions.append(position)
+        
+        if len(attackPositions) == NUMBER_OF_ATTACKS: break
+
+    # Sets attack positions
+    for a in attackPositions:
+        attackPair = attack.getAttackPair()
+        words[a] = Round(attackPair[0], attackPair[1])
+
+    # Place attension check in position 3 (index 2)
+    attensionCheckWords = gen_attension_check(wordlist)
+    words[2] = Round(attensionCheckWords[0], attensionCheckWords[1])
+
+    # Fill the rest with random words
+    for i, w in enumerate(words):
+        if not w:
+            words[i] = Round(get_random_words(wordlist))
+
+    for w in words:
+        exp.add_round(w)
+
+    return words
 
 def get_random_words(wordlist):
-    random.shuffle(wordlist)
-    return wordlist[:4]
+
+    words = []
+    while True:
+        position = random.randint(0, len(wordlist) - 1)
+        
+        word = wordlist[position]
+
+        if not word in words:
+            words.append(word)
+
+        if len(words) == NUMBER_OF_WORDS: break
+    return words
+
+def gen_attension_check(wordlist):
+
+    validResult = False
+
+    while not validResult:
+
+        pair1 = get_random_words(wordlist)
+        pair2 = get_random_words(wordlist)
+
+        for p in pair1:
+
+            if p in pair2:
+                break
+                
+        # If we get to the end without breaking
+        # we have a valid pair
+        else:
+            validResult = True
+
+    return pair1, pair2
 
 def experiment_finished(exp_id):
-    return Experiment.from_json(session[exp_id]).num_of_rounds() >= NUMBER_OF_ROUNDS
+    return Experiment.from_json(session[exp_id]).CurrentRound >= NUMBER_OF_ROUNDS

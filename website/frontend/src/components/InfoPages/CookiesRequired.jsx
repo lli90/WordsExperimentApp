@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export default class PostExperiment extends Component {
+export default class CookiesRequired extends Component {
 
     render() {
         return (
@@ -15,12 +15,11 @@ export default class PostExperiment extends Component {
               }}
             >
                 <div>
+                    This study cannot be completed with cookies deactivated.
                     <br/>
-                    Thank you for completing this section of the study.
                     <br/>
-                    <br/>
-                    Please navigate to the next page by clicking on the right arrow at the bottom of the screen.
-                </div>
+                    Please enable cookies and reload the page.
+              </div>
             </div>
         )
     }

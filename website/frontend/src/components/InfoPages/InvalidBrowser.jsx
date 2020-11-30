@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-export default class PostExperiment extends Component {
+export default class InvalidBrowser extends Component {
 
     render() {
         return (
@@ -15,11 +15,10 @@ export default class PostExperiment extends Component {
               }}
             >
                 <div>
+                    The study is not supported on Internet Explorer or Microsoft Edge.
                     <br/>
-                    Thank you for completing this section of the study.
                     <br/>
-                    <br/>
-                    Please navigate to the next page by clicking on the right arrow at the bottom of the screen.
+                    Please switch to Firefox or Chrome to complete this HIT
                 </div>
             </div>
         )

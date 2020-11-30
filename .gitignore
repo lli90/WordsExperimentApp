@@ -26,3 +26,8 @@ yarn-error.log*
 *.pyc
 *.mp3
 *.pkl
+
+/website/backend/results/*.json
+/website/backend/build
+/website/production*/website.zip
+/website/production*/*
