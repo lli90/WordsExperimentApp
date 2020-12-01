@@ -72,7 +72,7 @@ class Experiment:
         return self.AttackWords[self.CurrentRound] != None
 
     def check_if_round_started(self):
-        return len(self.VisualWords) == len(self.RoundStartTimes)
+        return not self.CurrentRound >= len(self.RoundStartTimes)
 
     def end_experiment(self):
         self.EndTime = time.time()
