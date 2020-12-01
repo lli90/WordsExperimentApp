@@ -8,6 +8,7 @@ import time
 import secrets
 import os
 import urllib
+from urllib.parse import urlparse
 
 from config import BASE_FILE_LOCATION 
 from experiment import Experiment
@@ -17,7 +18,7 @@ import utils
 METHOD_NOT_ALLOWED = "Error: Method not allowed"
 EXPERIMENT_NOT_FOUND = "Error: Experiment ID not found"
 
-ALLOWED_TRIAL_TYPES = ["visual", "verbal"]
+ALLOWED_TRIAL_TYPES = ["/visual", "/verbal"]
 
 app = Flask(__name__, static_folder="./build/static",
             template_folder="./build/")
@@ -29,12 +30,10 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='None',
 )
 
-
 WORDLIST_NAME = "trustwords.csv"
 
 def get_referring_endpoint(request):
-    referrer_last = request.referrer.split("/")[-1]
-    trialType = referrer_last.split("?")[0]
+    trialType = urlparse(request.referrer).path
 
     # Just to stop rnd stuff being passed into the session
     # dictionary
