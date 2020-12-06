@@ -11,3 +11,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.splitter-layout {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 96%;
+  overflow: hidden;
+}
