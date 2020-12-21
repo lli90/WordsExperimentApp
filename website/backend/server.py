@@ -262,6 +262,22 @@ def submit_result():
 
     exp.commit(session)
 
+
+@app.route('/audio_playing')
+@cross_origin()
+def audio_playing():
+    """
+    Endpoint contacted when the audio for the verbal trial begins playing
+    """
+
+    if not request.method == "GET":
+        return METHOD_NOT_ALLOWED, 400
+
+    exp_id = session.get(get_referring_endpoint(request))
+    exp = Experiment.from_json(session[exp_id])
+    exp.record_audio_play_time()
+    session[exp_id] = exp.to_json()
+
     return "OK"
 
 WORDLIST = utils.load_wordlist(f"{BASE_FILE_LOCATION}data/{WORDLIST_NAME}")

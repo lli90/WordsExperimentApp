@@ -3,7 +3,7 @@ import { Text } from 'react-native';
 import { Phone } from '@material-ui/icons';
 
 
-import { URL_BASE } from '../../global'
+import { URL_BASE, REQUEST_SETTINGS} from '../../global'
 import LoadingOverlay from 'react-loading-overlay';
 import Sound from 'react-sound'
 
@@ -53,6 +53,9 @@ export default class AudioButton extends Component {
             loading: false,
             loadingText: PLAYING_TEXT
         })
+
+        fetch(URL_BASE + '/audio_playing', REQUEST_SETTINGS)
+        .then(() => {})
     }
 
     handleSongFinishedPlaying() {
@@ -63,7 +66,6 @@ export default class AudioButton extends Component {
             disabled: false,
         })
     }
-
 
     render() {
 

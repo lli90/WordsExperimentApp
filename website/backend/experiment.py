@@ -68,6 +68,7 @@ class Experiment:
         self.AttackWords = []
         self.AudioButtonClicks = []
         self.AudioButtonTimes = []
+        self.AudioFirstPlayTime = []
 
         self.StartTime = time.time()
         self.RoundStartTimes = []
@@ -79,10 +80,9 @@ class Experiment:
         self.IsMTurk = isMTurk
         self.ParticipantID = participantID
 
-
     def commit(self, session):
         session[self.ExperimentID] = self.to_json()
-
+        
     def move_to_next_round(self):
         self.CurrentRound += 1
 
@@ -123,6 +123,17 @@ class Experiment:
         else:
             self.AudioButtonTimes.append([t])
 
+    def record_audio_play_time(self):
+        """
+        Records the time when the audio begins to play.
+        """
+        t = time.time()
+
+        if len(self.AudioFirstPlayTime) > self.CurrentRound:
+            self.AudioFirstPlayTime[self.CurrentRound].append(t)
+        else:
+            self.AudioFirstPlayTime.append([t])
+
     def is_attack(self):
         return self.AttackWords[self.CurrentRound] != None
 
@@ -153,6 +164,7 @@ class Experiment:
         exp.AttackWords         = dictionary["AttackWords"]
         exp.AudioButtonClicks   = dictionary["AudioButtonClicks"]
         exp.AudioButtonTimes    = dictionary["AudioButtonTimes"]
+        exp.AudioFirstPlayTime  = dictionary["AudioFirstPlayTime"]
         exp.StartTime           = dictionary["StartTime"]
         exp.RoundStartTimes     = dictionary["RoundStartTimes"]
         exp.RoundEndTimes       = dictionary["RoundEndTimes"]
