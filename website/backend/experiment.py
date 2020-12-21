@@ -169,26 +169,30 @@ class Experiment:
             f.write(json.dumps(self.to_json()))
 
     @staticmethod
+    def __vars__():
+        """
+        Gets a list of all of the variables available in the object
+        """
+
+        variables = []
+        exp = Experiment(None, None, None)
+        for v in dir(exp):
+            if not callable(getattr(exp, v)) and not v.startswith("__"):
+                variables.append(v)
+
+        return variables
+
+    @staticmethod
     def from_json(dictionary):
+        """
+        Loads a json dictionary into the class
+        """
+
+        variables = Experiment.__vars__()
         
         exp = Experiment(None, None, None)
 
-        exp.TrialType           = dictionary["TrialType"]
-        exp.CurrentRound        = dictionary["CurrentRound"]
-        exp.ExperimentID        = dictionary["ExperimentID"]
-        exp.VisualWords         = dictionary["VisualWords"]
-        exp.Responses           = dictionary["Responses"]
-        exp.AttackWords         = dictionary["AttackWords"]
-        exp.AudioButtonClicks   = dictionary["AudioButtonClicks"]
-        exp.AudioButtonTimes    = dictionary["AudioButtonTimes"]
-        exp.AudioPlayTimes      = dictionary["AudioPlayTimes"]
-        exp.ViewWordsClicks     = dictionary["ViewWordsClicks"]
-        exp.StartTime           = dictionary["StartTime"]
-        exp.RoundStartTimes     = dictionary["RoundStartTimes"]
-        exp.RoundEndTimes       = dictionary["RoundEndTimes"]
-        exp.EndTime             = dictionary["EndTime"]
-        exp.UserAgent           = dictionary["UserAgent"]
-        exp.IsMTurk             = dictionary["IsMTurk"]
-        exp.ParticipantID       = dictionary["ParticipantID"]
+        for v in variables:
+            exp.__dict__[v] = dictionary[v]
 
         return exp
