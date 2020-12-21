@@ -39,6 +39,9 @@ class Experiment:
               The audio element on the frontend will speak to
               the backend when the `onLoaded` event is triggered
 
+        ViewWordsClicks
+            - Timestamp of when the "View words" button is clicked by the participant
+
         StartTime
             - Start time of the entire experiment
 
@@ -75,6 +78,8 @@ class Experiment:
         self.AudioButtonClicks = []
         self.AudioButtonTimes = []
         self.AudioPlayTimes = []
+
+        self.ViewWordsClicks = []
 
         self.StartTime = time.time()
         self.RoundStartTimes = []
@@ -140,6 +145,12 @@ class Experiment:
         else:
             self.AudioPlayTimes.append([t])
 
+    def record_view_words_click_time(self):
+        """
+        Records when the "View words" button is clicked
+        """
+        self.ViewWordsClicks.append(time.time())
+
     def is_attack(self):
         return self.AttackWords[self.CurrentRound] != None
 
@@ -171,6 +182,7 @@ class Experiment:
         exp.AudioButtonClicks   = dictionary["AudioButtonClicks"]
         exp.AudioButtonTimes    = dictionary["AudioButtonTimes"]
         exp.AudioPlayTimes      = dictionary["AudioPlayTimes"]
+        exp.ViewWordsClicks     = dictionary["ViewWordsClicks"]
         exp.StartTime           = dictionary["StartTime"]
         exp.RoundStartTimes     = dictionary["RoundStartTimes"]
         exp.RoundEndTimes       = dictionary["RoundEndTimes"]

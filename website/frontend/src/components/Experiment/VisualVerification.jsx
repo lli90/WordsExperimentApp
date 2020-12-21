@@ -47,6 +47,8 @@ export default class VisualVerification extends Experiment {
             new_message: false,
             controlsDisabled: false
         })
+
+        fetch(URL_BASE + '/view_words_click', REQUEST_SETTINGS)
     }
 
     render() {

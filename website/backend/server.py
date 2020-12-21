@@ -262,6 +262,7 @@ def submit_result():
 
     exp.commit(session)
 
+    return "OK"
 
 @app.route('/audio_playing')
 @cross_origin()
@@ -270,13 +271,28 @@ def audio_playing():
     Endpoint contacted when the audio for the verbal trial begins playing
     """
 
-    if not request.method == "GET":
-        return METHOD_NOT_ALLOWED, 400
-
     exp_id = session.get(get_referring_endpoint(request))
+
+    if not exp_id in session:
+        return EXPERIMENT_NOT_FOUND, 400
+
     exp = Experiment.from_json(session[exp_id])
     exp.record_audio_play_time()
-    session[exp_id] = exp.to_json()
+    exp.commit(session)
+
+    return "OK"
+
+@app.route('/view_words_click')
+@cross_origin()
+def view_words_click():
+    exp_id = session.get(get_referring_endpoint(request))
+
+    if not exp_id in session:
+        return EXPERIMENT_NOT_FOUND, 400
+
+    exp = Experiment.from_json(session[exp_id])
+    exp.record_view_words_click_time()
+    exp.commit(session)
 
     return "OK"
 
