@@ -31,7 +31,13 @@ class Experiment:
             - How many times the audio button was clicked in each round
 
         AudioButtonTimes
-            - Timestamps of every audio button click
+            - Timestamps of when the audio button is clicked by the particpant
+
+        AudioPlayTimes
+            - Timestamps of when the audio actually starts playing. 
+            
+              The audio element on the frontend will speak to
+              the backend when the `onLoaded` event is triggered
 
         StartTime
             - Start time of the entire experiment
@@ -68,7 +74,7 @@ class Experiment:
         self.AttackWords = []
         self.AudioButtonClicks = []
         self.AudioButtonTimes = []
-        self.AudioFirstPlayTime = []
+        self.AudioPlayTimes = []
 
         self.StartTime = time.time()
         self.RoundStartTimes = []
@@ -129,10 +135,10 @@ class Experiment:
         """
         t = time.time()
 
-        if len(self.AudioFirstPlayTime) > self.CurrentRound:
-            self.AudioFirstPlayTime[self.CurrentRound].append(t)
+        if len(self.AudioPlayTimes) > self.CurrentRound:
+            self.AudioPlayTimes[self.CurrentRound].append(t)
         else:
-            self.AudioFirstPlayTime.append([t])
+            self.AudioPlayTimes.append([t])
 
     def is_attack(self):
         return self.AttackWords[self.CurrentRound] != None
@@ -164,7 +170,7 @@ class Experiment:
         exp.AttackWords         = dictionary["AttackWords"]
         exp.AudioButtonClicks   = dictionary["AudioButtonClicks"]
         exp.AudioButtonTimes    = dictionary["AudioButtonTimes"]
-        exp.AudioFirstPlayTime  = dictionary["AudioFirstPlayTime"]
+        exp.AudioPlayTimes      = dictionary["AudioPlayTimes"]
         exp.StartTime           = dictionary["StartTime"]
         exp.RoundStartTimes     = dictionary["RoundStartTimes"]
         exp.RoundEndTimes       = dictionary["RoundEndTimes"]
