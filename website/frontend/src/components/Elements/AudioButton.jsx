@@ -65,6 +65,8 @@ export default class AudioButton extends Component {
             id: this.randomNumber(),
             disabled: false,
         })
+
+        this.props.finishedPlayingCallback()
     }
 
     render() {

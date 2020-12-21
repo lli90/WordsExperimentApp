@@ -17,6 +17,10 @@ export default class Experiment extends Component {
 
         this.onAccept = this.onAccept.bind(this);
         this.onDecline = this.onDecline.bind(this);
+
+        this.onDeclineRequest = this.onDeclineRequest.bind(this);
+        this.onAcceptRequest = this.onAcceptRequest.bind(this);
+
         this.userResponse = this.userResponse.bind(this);
         this.toggleState = this.toggleState.bind(this);
 
@@ -43,7 +47,21 @@ export default class Experiment extends Component {
     onAccept() {
         toast.success("CONFIRM")
         this.toggleState();
-        fetch(URL_BASE + '/submit_result?result=True', REQUEST_SETTINGS)
+        this.onAcceptRequest()
+            .then((r) => r.text())
+            .then(() => this.refresh_attack_words())
+            .then(() => this.refresh_words())
+            .then(() => this.toggleState())
+    }
+
+    
+    /**
+     * TODO
+     */
+    onDecline() {
+        toast.error("REJECT")
+        this.toggleState();
+        this.onDeclineRequest()
             .then((r) => r.text())
             .then(() => this.refresh_attack_words())
             .then(() => this.refresh_words())
@@ -53,14 +71,15 @@ export default class Experiment extends Component {
     /**
      * TODO
      */
-    onDecline() {
-        toast.error("REJECT")
-        this.toggleState();
-        fetch(URL_BASE + '/submit_result?result=False', REQUEST_SETTINGS)
-            .then((r) => r.text())
-            .then(() => this.refresh_attack_words())
-            .then(() => this.refresh_words())
-            .then(() => this.toggleState())
+    onAcceptRequest() {
+        return fetch(URL_BASE + '/submit_result?result=True', REQUEST_SETTINGS)
+    }
+
+    /**
+     * TODO
+     */
+    onDeclineRequest() {
+        return fetch(URL_BASE + '/submit_result?result=False', REQUEST_SETTINGS)
     }
 
     /**

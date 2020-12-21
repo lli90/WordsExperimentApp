@@ -25,8 +25,12 @@ export default class VerbalVerification extends Experiment {
 
         // TODO: Make this dynamic
         this.state.total_rounds = 20;
-        
+
+        this.state.early_click = false;
+        this.state.late_click = false;
+
         this.audio_button_click = this.audio_button_click.bind(this);
+        this.audio_finished_playing = this.audio_finished_playing.bind(this);
     }
 
     refresh_attack_words() {
@@ -40,6 +44,51 @@ export default class VerbalVerification extends Experiment {
         this.setState({
             buttonToBeClicked: false
         })
+    }
+
+    userResponse(responseType) {
+
+        if (!this.state.late_click) {
+
+            this.setState({
+                loading: true,
+                early_click: true
+            })
+
+            // Sends off just the request 
+            if (responseType === true) {
+                this.onAcceptRequest();
+            } else {
+                this.onDeclineRequest();
+            }
+        } else {
+            this.setState({
+                late_click: false
+            })
+
+            super.userResponse(responseType)
+        }
+    }
+    
+    audio_finished_playing() {
+        // if the user clicked the button before the audio had finished playing we have an
+        // early click
+        if (this.state.early_click) {
+            this.refresh_attack_words()
+            this.refresh_words()
+
+            this.setState({
+                loading: false,
+                early_click: false
+            })
+        }
+        // If the user has waited until the audio has finished loading. We call this a late 
+        // click
+        else {
+            this.setState({
+                late_click: true,
+            })
+        }
     }
 
     render() {
@@ -101,6 +150,7 @@ export default class VerbalVerification extends Experiment {
                                 }}>
                                     <AudioButton
                                         loading={this.state.loading}
+                                        finishedPlayingCallback={this.audio_finished_playing}
                                         toggleButtonCallback={this.audio_button_click}
                                         wiggle={this.state.buttonToBeClicked}
                                     />
