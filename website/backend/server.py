@@ -59,6 +59,8 @@ def generate_audio_file(words):
     Generates the audio file for set of words and returns the filename
     """
     
+    duration = 0
+
     filePath = f"{BASE_FILE_LOCATION}audio/generated/{'_'.join(words)}.mp3"
     if not os.path.isfile(filePath):
 
@@ -71,8 +73,9 @@ def generate_audio_file(words):
             combined += a
 
         combined.export(filePath, format="mp3")
+        duration = len(combined)
 
-    return filePath.split("/")[-1]
+    return filePath.split("/")[-1], duration
 
 @app.after_request
 def after_request(response):
@@ -138,8 +141,9 @@ def get_audio():
     else:
         words = exp.get_current_wordlist()
 
-    fileName = generate_audio_file(words)
+    fileName, fileDuration = generate_audio_file(words)
 
+    exp.record_audio_clip_length(fileDuration)
     exp.commit(session)
 
     return send_from_directory(f'{BASE_FILE_LOCATION}audio/generated', fileName)

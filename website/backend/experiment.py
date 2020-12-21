@@ -30,7 +30,7 @@ class Experiment:
         AudioButtonClicks
             - How many times the audio button was clicked in each round
 
-        AudioButtonTimes
+        AudioButtonClickTimes
             - Timestamps of when the audio button is clicked by the particpant
 
         AudioPlayTimes
@@ -38,6 +38,9 @@ class Experiment:
             
               The audio element on the frontend will speak to
               the backend when the `onLoaded` event is triggered
+
+        AudioClipDurations
+            - Length in milliseconds of the generated audio clip
 
         ViewWordsClicks
             - Timestamp of when the "View words" button is clicked by the participant
@@ -76,8 +79,9 @@ class Experiment:
 
         self.AttackWords = []
         self.AudioButtonClicks = []
-        self.AudioButtonTimes = []
+        self.AudioButtonClickTimes = []
         self.AudioPlayTimes = []
+        self.AudioClipDurations = []
 
         self.ViewWordsClicks = []
 
@@ -129,10 +133,10 @@ class Experiment:
     def record_audio_button_click_time(self):
         t = time.time()
 
-        if len(self.AudioButtonTimes) > self.CurrentRound:
-            self.AudioButtonTimes[self.CurrentRound].append(t)
+        if len(self.AudioButtonClickTimes) > self.CurrentRound:
+            self.AudioButtonClickTimes[self.CurrentRound].append(t)
         else:
-            self.AudioButtonTimes.append([t])
+            self.AudioButtonClickTimes.append([t])
 
     def record_audio_play_time(self):
         """
@@ -150,6 +154,10 @@ class Experiment:
         Records when the "View words" button is clicked
         """
         self.ViewWordsClicks.append(time.time())
+
+    def record_audio_clip_length(self, length):
+        if len(self.AudioClipDurations) < self.CurrentRound:
+            self.AudioClipDurations.append(length)
 
     def is_attack(self):
         return self.AttackWords[self.CurrentRound] != None
