@@ -2,7 +2,59 @@ import time
 from config import BASE_FILE_LOCATION
 import json
 
+
 class Experiment:
+    """
+    Experiment object.
+
+    Current values:
+
+        TrialType
+            - Type of trial. Currently either "visual" or "verbal".
+
+        CurrentRound
+            - An internal variable used to represent the current round
+
+        ExperimentID
+            - GUID used to link to a user
+
+        VisualWords
+            - The words presented to the user
+
+        Responses
+            - Answers provided by the user
+
+        AttackWords
+            - If the element is not equal to "None" the index is the set of attack words presented visually or verbally.
+
+        AudioButtonClicks
+            - How many times the audio button was clicked in each round
+
+        AudioButtonTimes
+            - Timestamps of every audio button click
+
+        StartTime
+            - Start time of the entire experiment
+
+        RoundStartTimes
+            - Start time for each round
+
+        RoundEndTimes
+            - End time for each round
+
+        EndTime
+            - End time of the entire experiment
+
+        UserAgent
+            - User agent of the particpant
+
+        IsMTurk
+            - Analytical variable for MTurk participants
+
+        ParticipantID
+            - Participant ID. This is designed to be passed from Quartics.
+
+    """
 
     def __init__(self, experimentID, userAgent, trialType, participantID=None, isMTurk=None):
 
@@ -27,6 +79,9 @@ class Experiment:
         self.IsMTurk = isMTurk
         self.ParticipantID = participantID
 
+
+    def commit(self, session):
+        session[self.ExperimentID] = self.to_json()
 
     def move_to_next_round(self):
         self.CurrentRound += 1

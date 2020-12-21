@@ -33,6 +33,9 @@ app.config.update(
 WORDLIST_NAME = "trustwords.csv"
 
 def get_referring_endpoint(request):
+    """
+    Gets what type of trial the user has requested. 
+    """
     trialType = urlparse(request.referrer).path
 
     # Just to stop rnd stuff being passed into the session
@@ -42,60 +45,18 @@ def get_referring_endpoint(request):
 
     return trialType
 
-def get_reffering_query_params(request):
+def get_referring_query_params(request):
+    """
+    Gets the query parameters of a request 
+    """
     query_str = request.referrer.split("?")[-1]
     return urllib.parse.parse_qs(query_str)
 
-@app.after_request
-def add_header(response):
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    return response
-
-# This is used to fix Flask's compatability with the react-routing
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
-    return render_template("index.html")
-
-@app.route('/')
-def index():
-    return render_template("index.html")
-
-@app.route('/get_audio')
-@cross_origin()
-def get_audio():
+def generate_audio_file(words):
     """
-    Gets the currently active audio file
+    Generates the audio file for set of words and returns the filename
     """
-
-    if request.method != "GET":
-        return METHOD_NOT_ALLOWED, 400
-
-    exp_id = session.get(get_referring_endpoint(request))
-
-    if not exp_id in session:
-        return EXPERIMENT_NOT_FOUND, 400
-
-    exp = Experiment.from_json(session[exp_id])
-
-    if utils.experiment_finished(exp_id):
-        exp.end_experiment()
-        session[exp_id] = exp.to_json()
-
-        # TODO: Make more unique
-        return "DONE"
-
-    # Increments and saves changes
-    exp.increment_audio_clicks()
-    exp.record_audio_button_click_time()
-    session[exp_id] = exp.to_json()
-
-    # Checks for an attack case
-    if exp.is_attack():
-        words = exp.get_current_attack_wordlist()
-    else:
-        words = exp.get_current_wordlist()
-
+    
     filePath = f"{BASE_FILE_LOCATION}audio/generated/{'_'.join(words)}.mp3"
     if not os.path.isfile(filePath):
 
@@ -109,7 +70,73 @@ def get_audio():
 
         combined.export(filePath, format="mp3")
 
-    return send_from_directory(f'{BASE_FILE_LOCATION}audio/generated', filePath.split("/")[-1])
+    return filePath.split("/")[-1]
+
+@app.after_request
+def after_request(response):
+    """
+    Code performed after the request 
+    """
+
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Server'] = 'nginx'
+    return response
+
+@app.before_request
+def before_request():
+    if request.method != "GET":
+        return METHOD_NOT_ALLOWED, 405
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    """
+    This is used to fix Flask's compatability with the react-routing
+    """
+    return render_template("index.html")
+
+@app.route('/')
+def index():
+    """
+    Default endpoint
+    """
+    return render_template("index.html")
+
+@app.route('/get_audio')
+@cross_origin()
+def get_audio():
+    """
+    Gets the currently active audio file
+    """
+
+    exp_id = session.get(get_referring_endpoint(request))
+
+    if not exp_id in session:
+        return EXPERIMENT_NOT_FOUND, 400
+
+    exp = Experiment.from_json(session[exp_id])
+
+    if utils.experiment_finished(exp_id):
+        exp.end_experiment()
+        exp.commit(session)
+
+        return "DONE"
+
+    exp.increment_audio_clicks()
+    exp.record_audio_button_click_time()
+
+    # Checks for an attack case
+    if exp.is_attack():
+        words = exp.get_current_attack_wordlist()
+    else:
+        words = exp.get_current_wordlist()
+
+    fileName = generate_audio_file(words)
+
+    exp.commit(session)
+
+    return send_from_directory(f'{BASE_FILE_LOCATION}audio/generated', fileName)
 
 @app.route('/get_visual')
 @cross_origin()
@@ -117,9 +144,6 @@ def get_visual_attack_words():
     """
     Gets the set of possible attack words for the visual trial
     """
-
-    if request.method != "GET":
-        return METHOD_NOT_ALLOWED, 400
         
     exp_id = session.get(get_referring_endpoint(request))
 
@@ -131,14 +155,13 @@ def get_visual_attack_words():
     if utils.experiment_finished(exp_id):
 
         exp.end_experiment()
-        session[exp_id] = exp.to_json()
+        exp.commit(session)
 
-        # TODO: Make more unique. Put in a global variable
         return "DONE"
 
     if not exp.check_if_round_started():
         exp.record_round_start_time()
-        session[exp_id] = exp.to_json()
+        exp.commit(session)
 
     attackWordlist = exp.get_current_attack_wordlist()
 
@@ -154,9 +177,6 @@ def get_words():
     Gets the currently active set of words. This is the non-attack set
     """
     
-    if request.method != "GET":
-        return METHOD_NOT_ALLOWED, 400
-
     exp_id = session.get(get_referring_endpoint(request))
 
     if not exp_id in session:
@@ -167,23 +187,15 @@ def get_words():
     if utils.experiment_finished(exp_id):
 
         exp.end_experiment()
-        session[exp_id] = exp.to_json()
+        exp.commit(session)
 
-        # TODO: Turn this into a more unique string
         return "DONE"
 
     if not exp.check_if_round_started():
         exp.record_round_start_time()
-        session[exp_id] = exp.to_json()
+        exp.commit(session)
 
-    return "  ".join(Experiment.from_json(session[exp_id]).get_current_wordlist())
-
-@app.route("/get_id")
-@cross_origin()
-def get_id():
-    trialType = get_referring_endpoint(request)
-    # return session.get(trialType)
-    return "DEPRECATED"
+    return "  ".join(exp.get_current_wordlist())
 
 @app.route('/new_experiment')
 @cross_origin()
@@ -197,8 +209,9 @@ def new_experiment():
     if not trialType:
         return "Missing \'type\' parameter!", 400
 
-    query_params = get_reffering_query_params(request)
+    query_params = get_referring_query_params(request)
     
+    # If they're included the program will add
     participant_id = query_params.get("Participant_id")
     is_mturk = query_params.get("MTurk")
 
@@ -209,11 +222,10 @@ def new_experiment():
         exp_id = str(uuid.uuid4())
 
         session[trialType] = exp_id
-        session[exp_id] = Experiment(exp_id, user_agent, trialType, participant_id, is_mturk).to_json()
 
-        exp = Experiment.from_json(session[exp_id])
+        exp = Experiment(exp_id, user_agent, trialType, participant_id, is_mturk)
         utils.gen_word_set(WORDLIST, exp)
-        session[exp_id] = exp.to_json()
+        exp.commit(session)
 
         return exp_id 
 
@@ -227,11 +239,8 @@ def submit_result():
 
     Required params:
 
-    'result' should be "ACCEPT" or "DECLINE"
+    'result' should be "True" or "False"
     """
-
-    if not request.method == "GET":
-        return METHOD_NOT_ALLOWED, 400
 
     result = request.args.get("result", None)
 
@@ -244,17 +253,16 @@ def submit_result():
     exp_id = session.get(get_referring_endpoint(request))
 
     if not exp_id in session:
-        return "Error: No experiment found!", 400
+        return EXPERIMENT_NOT_FOUND, 400
 
     exp = Experiment.from_json(session[exp_id])
     exp.record_response(result)
     exp.record_round_end_time()
     exp.move_to_next_round()
-    session[exp_id] = exp.to_json()
 
-    # TODO: More unique response?
+    exp.commit(session)
+
     return "OK"
-
 
 WORDLIST = utils.load_wordlist(f"{BASE_FILE_LOCATION}data/{WORDLIST_NAME}")
 
