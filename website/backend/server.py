@@ -31,6 +31,8 @@ app.config.update(
 )
 
 WORDLIST_NAME = "trustwords.csv"
+CURRENT_EXP = "current_exp"
+
 
 def get_referring_endpoint(request):
     """
@@ -88,6 +90,14 @@ def before_request():
     if request.method != "GET":
         return METHOD_NOT_ALLOWED, 405
 
+    if request.endpoint != "new_experiment":
+        exp_id = session.get(get_referring_endpoint(request))
+
+        if not exp_id in session or exp_id == None:
+            return EXPERIMENT_NOT_FOUND, 400
+
+        session[CURRENT_EXP] = exp_id
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
@@ -110,11 +120,7 @@ def get_audio():
     Gets the currently active audio file
     """
 
-    exp_id = session.get(get_referring_endpoint(request))
-
-    if not exp_id in session:
-        return EXPERIMENT_NOT_FOUND, 400
-
+    exp_id = session[CURRENT_EXP]
     exp = Experiment.from_json(session[exp_id])
 
     if utils.experiment_finished(exp_id):
@@ -145,11 +151,7 @@ def get_visual_attack_words():
     Gets the set of possible attack words for the visual trial
     """
         
-    exp_id = session.get(get_referring_endpoint(request))
-
-    if not exp_id in session:
-        return EXPERIMENT_NOT_FOUND, 400
-
+    exp_id = session[CURRENT_EXP]
     exp = Experiment.from_json(session[exp_id])
 
     if utils.experiment_finished(exp_id):
@@ -177,11 +179,7 @@ def get_words():
     Gets the currently active set of words. This is the non-attack set
     """
     
-    exp_id = session.get(get_referring_endpoint(request))
-
-    if not exp_id in session:
-        return EXPERIMENT_NOT_FOUND, 400
-
+    exp_id = session[CURRENT_EXP]
     exp = Experiment.from_json(session[exp_id])
 
     if utils.experiment_finished(exp_id):
@@ -250,12 +248,9 @@ def submit_result():
     if not result in ["True", "False"]:
         return f"Error: Invalid value \"{result}\" for result", 400
 
-    exp_id = session.get(get_referring_endpoint(request))
-
-    if not exp_id in session:
-        return EXPERIMENT_NOT_FOUND, 400
-
+    exp_id = session[CURRENT_EXP]
     exp = Experiment.from_json(session[exp_id])
+
     exp.record_response(result)
     exp.record_round_end_time()
     exp.move_to_next_round()
@@ -271,12 +266,9 @@ def audio_playing():
     Endpoint contacted when the audio for the verbal trial begins playing
     """
 
-    exp_id = session.get(get_referring_endpoint(request))
-
-    if not exp_id in session:
-        return EXPERIMENT_NOT_FOUND, 400
-
+    exp_id = session[CURRENT_EXP]
     exp = Experiment.from_json(session[exp_id])
+
     exp.record_audio_play_time()
     exp.commit(session)
 
@@ -285,12 +277,9 @@ def audio_playing():
 @app.route('/view_words_click')
 @cross_origin()
 def view_words_click():
-    exp_id = session.get(get_referring_endpoint(request))
-
-    if not exp_id in session:
-        return EXPERIMENT_NOT_FOUND, 400
-
+    exp_id = session[CURRENT_EXP]
     exp = Experiment.from_json(session[exp_id])
+    
     exp.record_view_words_click_time()
     exp.commit(session)
 
