@@ -1,5 +1,6 @@
 from flask import Flask, request, send_from_directory, render_template, session
 from flask_cors import cross_origin
+from functools import wraps
 from pydub import AudioSegment
 import random
 import itertools
@@ -33,6 +34,23 @@ app.config.update(
 WORDLIST_NAME = "trustwords.csv"
 CURRENT_EXP = "current_exp"
 
+def requires_experiment_id(f):
+    @wraps(f)
+
+    def decorated_function(*args, **kwargs):
+        if request.method != "GET":
+                return METHOD_NOT_ALLOWED, 405
+
+        exp_id = session.get(get_referring_endpoint(request))
+
+        if not exp_id in session or exp_id == None:
+            return EXPERIMENT_NOT_FOUND, 400
+
+        session[CURRENT_EXP] = exp_id
+
+        return f(*args, **kwargs)
+    
+    return decorated_function
 
 def get_referring_endpoint(request):
     """
@@ -88,18 +106,6 @@ def after_request(response):
     response.headers['Server'] = 'nginx'
     return response
 
-@app.before_request
-def before_request():
-    if request.method != "GET":
-        return METHOD_NOT_ALLOWED, 405
-
-    if request.endpoint != "new_experiment":
-        exp_id = session.get(get_referring_endpoint(request))
-
-        if not exp_id in session or exp_id == None:
-            return EXPERIMENT_NOT_FOUND, 400
-
-        session[CURRENT_EXP] = exp_id
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -117,6 +123,7 @@ def index():
     return render_template("index.html")
 
 @app.route('/get_audio')
+@requires_experiment_id
 @cross_origin()
 def get_audio():
     """
@@ -149,6 +156,7 @@ def get_audio():
     return send_from_directory(f'{BASE_FILE_LOCATION}audio/generated', fileName)
 
 @app.route('/get_visual')
+@requires_experiment_id
 @cross_origin()
 def get_visual_attack_words():
     """
@@ -177,6 +185,7 @@ def get_visual_attack_words():
         return " ".join(exp.get_current_wordlist())
 
 @app.route('/get_words')
+@requires_experiment_id
 @cross_origin()
 def get_words():
     """
@@ -234,6 +243,7 @@ def new_experiment():
     return session.get(trialType)
 
 @app.route('/submit_result')
+@requires_experiment_id
 @cross_origin()
 def submit_result():
     """
@@ -264,6 +274,7 @@ def submit_result():
     return "OK"
 
 @app.route('/audio_playing')
+@requires_experiment_id
 @cross_origin()
 def audio_playing():
     """
@@ -279,6 +290,7 @@ def audio_playing():
     return "OK"
 
 @app.route('/view_words_click')
+@requires_experiment_id
 @cross_origin()
 def view_words_click():
     exp_id = session[CURRENT_EXP]
