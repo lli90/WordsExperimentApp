@@ -29,20 +29,14 @@ export default class VerbalVerification extends Experiment {
         this.state.early_click = false;
         this.state.late_click = false;
 
-        this.audio_button_click = this.audio_button_click.bind(this);
         this.audio_finished_playing = this.audio_finished_playing.bind(this);
+        this.audio_finished_loading = this.audio_finished_loading.bind(this);
     }
 
     refresh_attack_words() {
         this.setState({
             buttonToBeClicked: true,
             round_index: this.state.round_index + 1
-        })
-    }
-
-    audio_button_click() {
-        this.setState({
-            buttonToBeClicked: false
         })
     }
 
@@ -89,6 +83,12 @@ export default class VerbalVerification extends Experiment {
                 late_click: true,
             })
         }
+    }
+
+    audio_finished_loading() {
+        this.setState({
+            buttonToBeClicked: false
+        })
     }
 
     render() {
@@ -151,6 +151,7 @@ export default class VerbalVerification extends Experiment {
                                     <AudioButton
                                         loading={this.state.loading}
                                         finishedPlayingCallback={this.audio_finished_playing}
+                                        finishedLoadingCallback={this.audio_finished_loading}
                                         toggleButtonCallback={this.audio_button_click}
                                         wiggle={this.state.buttonToBeClicked}
                                     />
