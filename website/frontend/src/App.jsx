@@ -40,7 +40,7 @@ export default class App extends Component {
       return <InvalidBrowser />
     }
 
-    if (isMobile) {
+    if (isMobileOnly) {
       return <InvalidDevice />
     }
 

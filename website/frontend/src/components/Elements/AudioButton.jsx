@@ -29,6 +29,7 @@ export default class AudioButton extends Component {
 
         this.handleSongLoaded = this.handleSongLoaded.bind(this);
         this.handleSongFinishedPlaying = this.handleSongFinishedPlaying.bind(this);
+        this._play_audio = this._play_audio.bind(this);
     }
 
     randomNumber() {
@@ -43,6 +44,8 @@ export default class AudioButton extends Component {
             disabled: true,
             loadingText: LOADING_TEXT,
         })
+
+        this.props.buttonClickCallback();
     }
 
     handleSongLoaded(sound) {

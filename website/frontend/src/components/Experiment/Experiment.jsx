@@ -49,9 +49,7 @@ export default class Experiment extends Component {
         this.toggleState();
         this.onAcceptRequest()
             .then((r) => r.text())
-            .then(() => this.refresh_attack_words())
-            .then(() => this.refresh_words())
-            .then(() => this.toggleState())
+            .then((r) => this.afterResponse())
     }
 
     
@@ -63,9 +61,7 @@ export default class Experiment extends Component {
         this.toggleState();
         this.onDeclineRequest()
             .then((r) => r.text())
-            .then(() => this.refresh_attack_words())
-            .then(() => this.refresh_words())
-            .then(() => this.toggleState())
+            .then((r) => this.afterResponse())
     }
 
     /**
@@ -80,6 +76,17 @@ export default class Experiment extends Component {
      */
     onDeclineRequest() {
         return fetch(URL_BASE + '/submit_result?result=False', REQUEST_SETTINGS)
+    }
+
+    /**
+     * TODO
+     */
+    afterResponse() {
+        if (!this.state.experimentHasFinished) {
+            this.refresh_attack_words()
+            this.refresh_words()
+            this.toggleState()
+        }
     }
 
     /**

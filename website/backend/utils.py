@@ -1,5 +1,4 @@
 from flask import session
-from experiment import Experiment
 import attack
 import random
 
@@ -94,6 +93,3 @@ def gen_attension_check(wordlist):
             validResult = True
 
     return pair1, pair2
-
-def experiment_finished(exp_id):
-    return Experiment.from_json(session[exp_id]).CurrentRound >= NUMBER_OF_ROUNDS

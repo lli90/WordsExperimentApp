@@ -31,6 +31,7 @@ export default class VerbalVerification extends Experiment {
 
         this.audio_finished_playing = this.audio_finished_playing.bind(this);
         this.audio_finished_loading = this.audio_finished_loading.bind(this);
+        this.audio_button_click = this.audio_button_click.bind(this);
     }
 
     refresh_attack_words() {
@@ -87,7 +88,17 @@ export default class VerbalVerification extends Experiment {
 
     audio_finished_loading() {
         this.setState({
-            buttonToBeClicked: false
+            loading: false,
+            buttonToBeClicked: false,
+            controlsDisabled: false
+        })
+    }
+
+    audio_button_click() {
+        this.setState({
+            controlsDisabled: true,
+            early_click: false,
+            late_click: false 
         })
     }
 
@@ -152,7 +163,7 @@ export default class VerbalVerification extends Experiment {
                                         loading={this.state.loading}
                                         finishedPlayingCallback={this.audio_finished_playing}
                                         finishedLoadingCallback={this.audio_finished_loading}
-                                        toggleButtonCallback={this.audio_button_click}
+                                        buttonClickCallback={this.audio_button_click}
                                         wiggle={this.state.buttonToBeClicked}
                                     />
                                 </div>
@@ -171,7 +182,11 @@ export default class VerbalVerification extends Experiment {
                                 resultCallback={this.userResponse}
                                 words={this.state.trustWords}
                                 loading={this.state.loading}
-                                controlsDisabled={this.state.controlsDisabled || this.state.buttonToBeClicked}
+                                controlsDisabled={
+                                    this.state.controlsDisabled 
+                                    || this.state.buttonToBeClicked 
+                                    || this.state.loading
+                                }
                                 message={msg}
                             />
                         } />
