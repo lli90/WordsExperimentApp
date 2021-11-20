@@ -22,7 +22,7 @@ export default class VisualVerification extends Experiment {
         this.state.new_message = true;
 
         // TODO: Make this dynamic
-        this.state.total_rounds = 20;
+        this.state.total_rounds = 25;
 
         this.click_message_callback = this.click_message_callback.bind(this);
     }

@@ -46,8 +46,14 @@ def gen_word_set(wordlist, exp):
         words[a] = Round(attackPair[0], attackPair[1])
 
     # Place attension check in position 3 (index 2)
-    attensionCheckWords = gen_attension_check(wordlist)
-    words[2] = Round(attensionCheckWords[0], attensionCheckWords[1])
+    attensionCheckWords1 = gen_attension_check(wordlist)
+    words[2] = Round(attensionCheckWords1[0], attensionCheckWords1[1])
+
+    #add additional attention check towards end
+    s = random.SystemRandom()
+    attention_check2 = s.randint(NUMBER_OF_ROUNDS - 3, NUMBER_OF_ROUNDS)
+    attensionCheckWords2 = gen_attension_check(wordlist)
+    words[attention_check2] = Round(attensionCheckWords2[0], attensionCheckWords2[1])
 
     # Fill the rest with random words
     for i, w in enumerate(words):

@@ -24,7 +24,7 @@ export default class VerbalVerification extends Experiment {
         this.state.new_message = true;
 
         // TODO: Make this dynamic
-        this.state.total_rounds = 20;
+        this.state.total_rounds = 25;
 
         this.state.early_click = false;
         this.state.late_click = false;

@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
-import { isMobile, isEdge, isIE} from "react-device-detect";
+//import { isMobile, isEdge, isIE} from "react-device-detect";
+import {isEdge, isIE} from "react-device-detect";
+
 
 // Global CSS imports
 import './stylesheets/App.css'
@@ -15,7 +17,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import VerbalVerification from './components/Experiment/VerbalVerification.jsx';
 import VisualVerification from './components/Experiment/VisualVerification.jsx';
 import PostExperiment from './components/InfoPages/PostExperiment.jsx'
-import InvalidDevice from './components/InfoPages/InvalidDevice';
+//import InvalidDevice from './components/InfoPages/InvalidDevice';
 import CookiesRequired from './components/InfoPages/CookiesRequired';
 import InvalidBrowser from './components/InfoPages/InvalidBrowser';
 
@@ -40,9 +42,9 @@ export default class App extends Component {
       return <InvalidBrowser />
     }
 
-    if (isMobileOnly) {
-      return <InvalidDevice />
-    }
+//    if (isMobileOnly) {
+//      return <InvalidDevice />
+//    }
 
     if (!areCookiesEnabled()) {
       return <CookiesRequired />
