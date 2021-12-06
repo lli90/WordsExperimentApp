@@ -50,8 +50,8 @@ def gen_word_set(wordlist, exp):
     # Sets attack positions
     all_attacks = attack.getAttackPairs()
     for a in attack_positions:
-        attackpair = all_attacks.pop()
-        words[a] = Round(attackPair[0], attackPair[1])
+        attack_pair = all_attacks.pop()
+        words[a] = Round(attack_pair[0], attack_pair[1])
 
     # Fill the rest with random words
     for i, w in enumerate(words):
