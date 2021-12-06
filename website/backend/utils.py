@@ -26,34 +26,32 @@ def gen_word_set(wordlist, exp):
     """
 
     words = [None] * NUMBER_OF_ROUNDS
-
-    # Generates attack positions
-    attackPositions = []
-    while True:
-
-        r = random.SystemRandom()
-
-        position = r.randint(GRACE_ROUNDS + 1, NUMBER_OF_ROUNDS) - 1
-
-        if not position in attackPositions:
-            attackPositions.append(position)
-        
-        if len(attackPositions) == NUMBER_OF_ATTACKS: break
-
-    # Sets attack positions
-    for a in attackPositions:
-        attackPair = attack.getAttackPair()
-        words[a] = Round(attackPair[0], attackPair[1])
-
-    # Place attension check in position 3 (index 2)
-    attensionCheckWords1 = gen_attension_check(wordlist)
-    words[2] = Round(attensionCheckWords1[0], attensionCheckWords1[1])
+    
+    #Place attention check in position 3 (index 2)
+    attention_check_words1 = gen_attention_check(wordlist)
+    words[2] = Round(attention_check_words1[0], attention_check_words1[1])
 
     #add additional attention check towards end
     s = random.SystemRandom()
-    attention_check2 = s.randint(NUMBER_OF_ROUNDS - 3, NUMBER_OF_ROUNDS)
-    attensionCheckWords2 = gen_attension_check(wordlist)
-    words[attention_check2] = Round(attensionCheckWords2[0], attensionCheckWords2[1])
+    attention_check2 = s.randint(NUMBER_OF_ROUNDS - 3, NUMBER_OF_ROUNDS - 1)  	
+    attention_check_words2 = gen_attention_check(wordlist)    
+    words[attention_check2] = Round(attention_check_words2[0], attention_check_words2[1])
+
+
+    # Generates attack positions
+    attack_positions = []
+    while len(attack_positions) != NUMBER_OF_ATTACKS:
+        r = random.SystemRandom()
+        position = r.randint(GRACE_ROUNDS, attention_check2 - 1)
+
+        if (not position in attack_positions) and words[position] == None:
+            attack_positions.append(position)
+        
+    # Sets attack positions
+    all_attacks = attack.getAttackPairs()
+    for a in attack_positions:
+        attackpair = all_attacks.pop()
+        words[a] = Round(attackPair[0], attackPair[1])
 
     # Fill the rest with random words
     for i, w in enumerate(words):
@@ -64,11 +62,12 @@ def gen_word_set(wordlist, exp):
         exp.add_round(w)
 
     return words
+      
 
 def get_random_words(wordlist):
 
     words = []
-    while True:
+    while len(words) != NUMBER_OF_WORDS:
         position = random.randint(0, len(wordlist) - 1)
         
         word = wordlist[position]
@@ -76,10 +75,9 @@ def get_random_words(wordlist):
         if not word in words:
             words.append(word)
 
-        if len(words) == NUMBER_OF_WORDS: break
     return words
 
-def gen_attension_check(wordlist):
+def gen_attention_check(wordlist):
 
     validResult = False
 

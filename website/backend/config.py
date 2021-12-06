@@ -5,6 +5,3 @@ NUMBER_OF_WORDS = 5
 
 # Number of initial rounds that can't contain an attack
 GRACE_ROUNDS = 4 
-
-# Not zero indexed
-#ATTENSION_CHECK_ROUND = 3 

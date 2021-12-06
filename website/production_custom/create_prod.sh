@@ -6,7 +6,7 @@ PYTHONANYWHERE_USERNAME="lwl501"
 GLOBAL_BAK=../frontend/src/global_old.bak
 GLOABL_JSX=../frontend/src/global.jsx
 
-# fronend
+# frontend
 cat $GLOABL_JSX > $GLOBAL_BAK
 cat ./_global.jsx > $GLOABL_JSX
 

@@ -3,36 +3,22 @@
 * Changed the attack word pairs in /backend/data
 
 * Changed parameters in /backen/config.py
-	BASE_FILE_LOCATION = "" #B700
-	NUMBER_OF_ATTACKS = 5
-	NUMBER_OF_ROUNDS = 25
-	NUMBER_OF_WORDS = 5
-
-	# Number of initial rounds that can't contain an attack
-	GRACE_ROUNDS = 4 
-
-	# Not zero indexed
-	#ATTENSION_CHECK_ROUND = 3 
 	
 * added an additional attention check towards the end of the comparisons -> /backend/utils.py
-
 
 * changed the progress bar to be out of 25 
 	-> /frontend/src/components/Experiment/*Verification.jsx
 
-* commented out the Mobile device check in /frontend/src/App.jsx
+* commented out the Mobile device check in /frontend/src/App.jsx. Track this within qualtrics.
 
 * added in the audio files (then removed them again before ziping as the file is too big for git)
+        * would a .gitignore file help here?
 
-----------------------------------------------------------------------------------------
-- Issues -
+* Make the attack script return all 5 attacks in a list from one function call.  More efficient and avoids repeated attacks.
 
-* When the app loads on the development server, the words of the fingerpint do not appear.
+* Set the position of the attention checks first, to prevent an attention check overwriting an attack instance.
 
-* I'm guessing that it's something to do with the frontend code?
-* I have updated npm and I guess this migh tbe part of the issue?
-
-(I'm not actally too sure about what's happening on the frontend as I haven't got my head around Javascript yet)
+* fixed bug that made same 5 attacks be presented each time.  Needed a random int based on len(attack_pairs['pairs'])
 
 
 
