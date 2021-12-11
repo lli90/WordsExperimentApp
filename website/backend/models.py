@@ -17,6 +17,11 @@ class Experiment(db.Model):
     trialType = db.Column(db.String(20))
 
     """
+    Type of similarity. Either "orth" or "phon".
+    """
+    similarityType = db.Column(db.String(20))
+
+    """
     An internal variable used to represent the current round
     """
     currentRound = db.Column(db.Integer)
@@ -90,27 +95,28 @@ class Experiment(db.Model):
     userAgent = db.Column(db.String(100))
 
     """
-    Analytical variable for MTurk participants
+    Analytical variable for participant recruitment source
     """
-    isMTurk = db.Column(db.String(10), default=False)
+    recruit_source = db.Column(db.String(20))
 
     """
     Participant ID. This is designed to be passed from Quartics.
     """
     participantID = db.Column(db.String(100), default="")
 
-    def __init__(self, experimentID, userAgent, trialType, participantID=False, isMTurk=False):
+    def __init__(self, experimentID, userAgent, trialType, similarityType='phon', participantID=False, recruit_source=False):
 
         self.currentRound = 0
         # self.trialType = trialType
         self.guid = experimentID
 
         self.trialType = trialType
+        self.similarityType = similarityType
 
         self.startTime = str(time.time())
         self.userAgent = userAgent
 
-        self.isMTurk = isMTurk
+        self.recruit_source = recruit_source
         self.participantID = participantID
 
     def _word_to_list(self, words):

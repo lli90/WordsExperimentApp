@@ -4,8 +4,8 @@ import json
 from config import BASE_FILE_LOCATION
 from config import NUMBER_OF_ATTACKS
 
-def getAttackPairs():
-    with open(f"{BASE_FILE_LOCATION}data/attackPairs.json", "r") as f:
+def getAttackPairs(SIM_TYPE):
+    with open(f"{BASE_FILE_LOCATION}data/{SIM_TYPE}_attackPairs.json", "r") as f:
         data = f.read()
 
     attack_pairs = json.loads(data)

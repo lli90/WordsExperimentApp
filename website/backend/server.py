@@ -282,16 +282,18 @@ def new_experiment():
 
     query_params = get_referring_query_params(request)
     
+    similarity_type = query_params.get("SimType")
+    if similarity_type:
+        similarity_type = similarity_type[0]
+    
     # If they're included the program will add
-    participant_id = query_params.get("Participant_id")
-
+    participant_id = query_params.get("ParticipantID")
     if participant_id:
         participant_id = participant_id[0]
 
-    is_mturk = query_params.get("MTurk")
-
-    if is_mturk:
-        is_mturk = is_mturk[0]
+    recruit_source = query_params.get("RecruitSource")
+    if recruit_source:
+        recruit_source = recruit_source[0]
 
     if not session.get(trialType):
         user_agent = request.headers.get("User-Agent")
@@ -301,8 +303,8 @@ def new_experiment():
 
         session[trialType] = exp_id
 
-        exp = Experiment(exp_id, user_agent, trialType, participant_id, is_mturk)
-        utils.gen_word_set(WORDLIST, exp)
+        exp = Experiment(exp_id, user_agent, trialType, similarity_type, participant_id, recruit_source)
+        utils.gen_word_set(WORDLIST, exp, similarity_type = 'phon')
 
         return exp_id 
 

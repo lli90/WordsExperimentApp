@@ -19,7 +19,7 @@ def load_wordlist(path):
 
     return wordlist
 
-def gen_word_set(wordlist, exp):
+def gen_word_set(wordlist, exp, SIM_TYPE):
     """
     Method creates the entire experiment schema. 
     It generates all the words required and places attacks in the #
@@ -48,7 +48,8 @@ def gen_word_set(wordlist, exp):
             attack_positions.append(position)
         
     # Sets attack positions
-    all_attacks = attack.getAttackPairs()
+    #SIM_TYPE is {phon, orth} passed in as a GET parameter
+    all_attacks = attack.getAttackPairs(SIM_TYPE)
     for a in attack_positions:
         attack_pair = all_attacks.pop()
         words[a] = Round(attack_pair[0], attack_pair[1])
