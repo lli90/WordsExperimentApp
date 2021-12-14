@@ -2,7 +2,7 @@
 
 * Changed the attack word pairs in /backend/data
 
-* Changed parameters in /backen/config.py
+* Changed parameters in /backend/config.py
 	
 * added an additional attention check towards the end of the comparisons -> /backend/utils.py
 
@@ -20,7 +20,19 @@
 
 * fixed bug that made same 5 attacks be presented each time.  Needed a random int based on len(attack_pairs['pairs'])
 
+----------------------------------------------------------------------------------------------------------------------------
 
+* added a SimType url parameter to enable selection of the type of attacks to be shown to the user. 
+  Ensured that this value was set to a safe default ('phon') in the case of not having the required parameters.
+  
+* Updated the database to include the similarity type variable.
+* Renamed the isMturk variable to RecruitSource so as to better reflect ot's new intended usage.
 
+* Required URL parameters (passed from Qualtrics)
+        - SimType
+        - ParticipantID
+        - RecruitSource
 
+        https://lwl501.pythonanywhere.com/verbal?SimType=phon&ParticipantID=1909&RecruitSource=Local
 
+        https://lwl501.pythonanywhere.com/visual?SimType=orth&ParticipantID=1909&RecruitSource=Local

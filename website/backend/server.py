@@ -283,8 +283,14 @@ def new_experiment():
     query_params = get_referring_query_params(request)
     
     similarity_type = query_params.get("SimType")
+    app.logger.debug(f"similarity_type: {similarity_type}. Type: {type(similarity_type)}")
+    
     if similarity_type:
         similarity_type = similarity_type[0]
+        
+    if similarity_type == None:
+        similarity_type = 'phon'
+    app.logger.debug(f"similarity_type: {similarity_type}. Type: {type(similarity_type)}")
     
     # If they're included the program will add
     participant_id = query_params.get("ParticipantID")
@@ -304,7 +310,7 @@ def new_experiment():
         session[trialType] = exp_id
 
         exp = Experiment(exp_id, user_agent, trialType, similarity_type, participant_id, recruit_source)
-        utils.gen_word_set(WORDLIST, exp, similarity_type = 'phon')
+        utils.gen_word_set(WORDLIST, exp, similarity_type)
 
         return exp_id 
 
