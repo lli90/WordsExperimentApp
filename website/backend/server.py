@@ -288,7 +288,7 @@ def new_experiment():
     if similarity_type:
         similarity_type = similarity_type[0]
         
-    if similarity_type == None:
+    if similarity_type != 'phon' or 'orth':
         similarity_type = 'phon'
     app.logger.debug(f"similarity_type: {similarity_type}. Type: {type(similarity_type)}")
     
