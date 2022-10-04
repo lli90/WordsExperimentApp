@@ -14,7 +14,7 @@ import json
 import collections
 from urllib.parse import urlparse
 
-from config import BASE_FILE_LOCATION 
+from config import BASE_FILE_LOCATION
 import attack
 import utils
 import logging
@@ -49,7 +49,6 @@ db = SQLAlchemy(app)
 from models import *
 
 WORDLIST_NAME = "trustwords.csv"
-CURRENT_EXP = "current_exp"
 
 def requires_experiment_id(f):
     @wraps(f)
@@ -66,15 +65,15 @@ def requires_experiment_id(f):
             app.logger.debug(f"Experiment ID was not found")
             return EXPERIMENT_NOT_FOUND, 400
 
-        session[CURRENT_EXP] = exp_id
+        session["current_exp"] = exp_id
 
         return f(*args, **kwargs)
-    
+
     return decorated_function
 
 def get_referring_endpoint(request):
     """
-    Gets what type of trial the user has requested. 
+    Gets what type of trial the user has requested.
     """
     trialType = urlparse(request.referrer).path
 
@@ -88,7 +87,7 @@ def get_referring_endpoint(request):
 
 def get_referring_query_params(request):
     """
-    Gets the query parameters of a request 
+    Gets the query parameters of a request
     """
     query_str = request.referrer.split("?")[-1]
     return urllib.parse.parse_qs(query_str)
@@ -99,7 +98,7 @@ def generate_audio_file(words):
     """
 
     app.logger.debug(f"Generating audio file for: {str(words)}")
-    
+
     duration = 0
 
     filePath = f"{BASE_FILE_LOCATION}audio/generated/{'_'.join(words)}.mp3"
@@ -128,7 +127,7 @@ def save_exp_to_json(exp):
 
     def iterable(arg):
         return (
-            isinstance(arg, collections.Iterable) 
+            isinstance(arg, collections.Iterable)
             and not isinstance(arg, str)
         )
 
@@ -165,7 +164,7 @@ def save_exp_to_json(exp):
 @app.after_request
 def after_request(response):
     """
-    Code performed after the request 
+    Code performed after the request
     """
 
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
@@ -177,6 +176,8 @@ def finish_experiment(exp):
     app.logger.debug("Experiment has finished!")
     exp.end_experiment()
     save_exp_to_json(exp)
+    #delete the server side session.  If left session[trial_type] remains defined (via the cookie?)
+    session.clear()
 
     return "DONE"
 
@@ -202,7 +203,7 @@ def get_audio():
     """
     Gets the currently active audio file
     """
-    exp_id = session[CURRENT_EXP]
+    exp_id = session["current_exp"]
     exp = get_experiment_from_db(exp_id)
 
     if exp.is_finished():
@@ -231,8 +232,8 @@ def get_visual_attack_words():
     """
     Gets the set of possible attack words for the visual trial
     """
-        
-    exp_id = session[CURRENT_EXP]
+
+    exp_id = session["current_exp"]
     exp = get_experiment_from_db(exp_id)
 
     if exp.is_finished():
@@ -245,10 +246,10 @@ def get_visual_attack_words():
 
     if attackWordlist != ["NULL"]:
         app.logger.debug(f"Word: {attackWordlist}")
-        return " ".join(attackWordlist)
+        return "\n".join(attackWordlist)
     else:
         app.logger.debug(f"Word: {exp.get_current_wordlist()}")
-        return " ".join(exp.get_current_wordlist())
+        return "\n".join(exp.get_current_wordlist())
 
 @app.route('/get_words')
 @requires_experiment_id
@@ -257,7 +258,7 @@ def get_words():
     """
     Gets the currently active set of words. This is the non-attack set
     """
-    exp_id = session[CURRENT_EXP]
+    exp_id = session["current_exp"]
     exp = get_experiment_from_db(exp_id)
 
     if exp.is_finished():
@@ -266,7 +267,7 @@ def get_words():
     if not exp.check_if_round_started():
         exp.record_round_start_time()
 
-    return "  ".join(exp.get_current_wordlist())
+    return "\n ".join(exp.get_current_wordlist())
 
 @app.route('/new_experiment')
 @cross_origin()
@@ -281,19 +282,19 @@ def new_experiment():
         return "Missing \'type\' parameter!", 400
 
     query_params = get_referring_query_params(request)
-    
+
     similarity_type = query_params.get("SimType")
-    app.logger.debug(f"similarity_type: {similarity_type}. Type: {type(similarity_type)}")
-    
+
     if similarity_type:
         similarity_type = similarity_type[0]
-        
-    if similarity_type != 'phon' or 'orth':
+
+    app.logger.debug(f"initial similarity_type: {similarity_type}.")
+
+    if similarity_type != 'phon' and similarity_type != 'orth':
         similarity_type = 'phon'
-    app.logger.debug(f"similarity_type: {similarity_type}. Type: {type(similarity_type)}")
-    
+
     # If they're included the program will add
-    participant_id = query_params.get("ParticipantID")
+    participant_id = query_params.get("Participant_id")
     if participant_id:
         participant_id = participant_id[0]
 
@@ -301,20 +302,26 @@ def new_experiment():
     if recruit_source:
         recruit_source = recruit_source[0]
 
-    if not session.get(trialType):
-        user_agent = request.headers.get("User-Agent")
+    app.logger.debug(f"Participant ID: {participant_id}.")
+    app.logger.debug(f"similarity_type: {similarity_type}.")
+    app.logger.debug(f"Recruitment Source: {recruit_source}.")
 
-        exp_id = str(uuid.uuid4())
-        app.logger.debug(f"Experiment found: {exp_id} - {trialType}")
 
-        session[trialType] = exp_id
 
-        exp = Experiment(exp_id, user_agent, trialType, similarity_type, participant_id, recruit_source)
-        utils.gen_word_set(WORDLIST, exp, similarity_type)
+    #if not session.get(trialType):
+    user_agent = request.headers.get("User-Agent")
 
-        return exp_id 
+    exp_id = str(uuid.uuid4())
+    app.logger.debug(f"Experiment found: {exp_id} - {trialType}")
 
-    return session.get(trialType)
+    session[trialType] = exp_id
+
+    exp = Experiment(exp_id, user_agent, trialType, similarity_type, participant_id, recruit_source)
+    utils.gen_word_set(WORDLIST, exp, similarity_type)
+
+    return exp_id
+
+   # return session.get(trialType)
 
 @app.route('/submit_result')
 @requires_experiment_id
@@ -336,7 +343,7 @@ def submit_result():
     if not result in ["True", "False"]:
         return f"Error: Invalid value \"{result}\" for result", 400
 
-    exp_id = session[CURRENT_EXP]
+    exp_id = session["current_exp"]
     exp = get_experiment_from_db(exp_id)
 
     exp.record_response(result)
@@ -353,7 +360,7 @@ def audio_playing():
     Endpoint contacted when the audio for the verbal trial begins playing
     """
 
-    exp_id = session[CURRENT_EXP]
+    exp_id = session["current_exp"]
     exp = get_experiment_from_db(exp_id)
 
     exp.record_audio_play_time()
@@ -364,9 +371,9 @@ def audio_playing():
 @requires_experiment_id
 @cross_origin()
 def view_words_click():
-    exp_id = session[CURRENT_EXP]
+    exp_id = session["current_exp"]
     exp = get_experiment_from_db(exp_id)
-    
+
     exp.record_view_words_click_time()
 
     return "OK"

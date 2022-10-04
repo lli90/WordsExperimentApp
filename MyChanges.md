@@ -1,4 +1,4 @@
-** App Changes **
+# App Changes
 
 * Changed the attack word pairs in /backend/data
 
