@@ -12,7 +12,7 @@ cat ./_global.jsx > $GLOBAL_JSX
 
 cd ../frontend
 ./deploy.sh
-cd ../production_custom
+cd ../production
 
 # production
 rm -rf ./website website.zip
@@ -22,7 +22,6 @@ cp -r ../backend/* ./website
 
 rm -rf ./website/env || true
 rm -rf ./website/__pycache__ || true
-rm -rf ./website/audio || true
 rm     ./website/results/*.pkl || true
 
 sed -i "s/\"\" #B700/\"\/home\/${PYTHONANYWHERE_USERNAME}\/website\/\"/g" ./website/config.py 
