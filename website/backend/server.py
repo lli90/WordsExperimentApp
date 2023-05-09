@@ -18,6 +18,8 @@ from config import BASE_FILE_LOCATION
 import attack
 import utils
 import logging
+import polly_numbers
+from mutagen.mp3 import MP3
 
 
 logging.basicConfig(
@@ -99,23 +101,11 @@ def generate_audio_file(words):
 
     app.logger.debug(f"Generating audio file for: {str(words)}")
 
-    duration = 0
+    filepath = polly_numbers.get_audio_clip(words)
 
-    filePath = f"{BASE_FILE_LOCATION}audio/generated/{'_'.join(words)}.mp3"
-    if not os.path.isfile(filePath):
+    duration = MP3(filepath).info.length
 
-        combined = AudioSegment.from_mp3(
-            f"{BASE_FILE_LOCATION}audio/{words[0].upper()}.mp3")
-
-        for w in words[1:]:
-            a = AudioSegment.from_mp3(
-                f"{BASE_FILE_LOCATION}audio/{w.upper()}.mp3")
-            combined += a
-
-        combined.export(filePath, format="mp3")
-        duration = len(combined)
-
-    return filePath.split("/")[-1], duration
+    return filepath.split("/")[-1], duration
 
 def get_experiment_from_db(exp_id):
     return Experiment.query.filter_by(guid=exp_id).first()
@@ -138,6 +128,8 @@ def save_exp_to_json(exp):
 
     variables.remove("query")
     variables.remove("metadata")
+    variables.remove("registry")
+
 
     json_out = {}
     for v in variables:
@@ -219,11 +211,11 @@ def get_audio():
     else:
         words = exp.get_current_wordlist()
 
-    fileName, fileDuration = generate_audio_file(words)
+    filename, fileDuration = generate_audio_file(words)
 
     exp.record_audio_clip_length(fileDuration)
 
-    return send_from_directory(f'{BASE_FILE_LOCATION}audio/generated', fileName)
+    return send_from_directory(f'{BASE_FILE_LOCATION}audio/generated', filename)
 
 @app.route('/get_visual')
 @requires_experiment_id
@@ -306,9 +298,6 @@ def new_experiment():
     app.logger.debug(f"similarity_type: {similarity_type}.")
     app.logger.debug(f"Recruitment Source: {recruit_source}.")
 
-
-
-    #if not session.get(trialType):
     user_agent = request.headers.get("User-Agent")
 
     exp_id = str(uuid.uuid4())
@@ -320,8 +309,6 @@ def new_experiment():
     utils.gen_word_set(WORDLIST, exp, similarity_type)
 
     return exp_id
-
-   # return session.get(trialType)
 
 @app.route('/submit_result')
 @requires_experiment_id

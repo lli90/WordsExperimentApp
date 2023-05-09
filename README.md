@@ -1,3 +1,3 @@
 # MSc_experiment_website
 
-This application enables participants to make fingerprint comparisions during studies for my PhD.
+This application enables participants to compare word-based key fingerprints as investigated during my PhD.
